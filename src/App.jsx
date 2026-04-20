@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapIcon, Filter, Layers, Navigation, MapPin } from 'lucide-react';
+import { renderToString } from 'react-dom/server';
+import { MapIcon, Filter, Layers, Navigation, MapPin, GraduationCap, HeartPulse, ShoppingBag, Landmark } from 'lucide-react';
 import './index.css';
 
 // Fix for default Leaflet markers issue in React
@@ -22,13 +23,24 @@ const KAT_COLORS = {
   'PERBANKAN': '#f59e0b'        // gold
 };
 
-const createCustomIcon = (color) => {
+const KAT_ICONS = {
+  'PENDIDIKAN NEGERI': <GraduationCap size={16} color="#ffffff" />,
+  'PENDIDIKAN SWASTA': <GraduationCap size={16} color="#ffffff" />,
+  'KESEHATAN': <HeartPulse size={16} color="#ffffff" />,
+  'EKONOMI': <ShoppingBag size={16} color="#ffffff" />,
+  'PERBANKAN': <Landmark size={16} color="#ffffff" />
+};
+
+const createCustomIcon = (color, category) => {
+  const iconComponent = KAT_ICONS[category] || <MapPin size={16} color="#ffffff" />;
+  const iconHtml = renderToString(iconComponent);
+  
   return L.divIcon({
     className: 'custom-marker',
-    html: `<div class="marker-inner" style="background-color: ${color};"></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    popupAnchor: [0, -10]
+    html: `<div class="marker-icon-wrapper" style="background-color: ${color};">${iconHtml}</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
   });
 };
 
@@ -162,7 +174,7 @@ export default function App() {
             <Marker 
               key={item.id} 
               position={[item.lat, item.lng]}
-              icon={createCustomIcon(KAT_COLORS[item.kat] || '#fff')}
+              icon={createCustomIcon(KAT_COLORS[item.kat] || '#fff', item.kat)}
             >
               <Popup>
                 <div className="popup-kategori" style={{ color: KAT_COLORS[item.kat] || '#fff' }}>

@@ -203,17 +203,23 @@ body {
   border: none;
 }
 
-.marker-inner {
-  width: 14px;
-  height: 14px;
+.marker-icon-wrapper {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 2px solid white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  transition: transform 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: white; /* Ensure SVG inherits white */
 }
 
-.marker-inner:hover {
-  transform: scale(1.5);
+.marker-icon-wrapper:hover {
+  transform: scale(1.15) translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+  z-index: 1000;
 }
 
 /* Custom Popup CSS Formatted for Glassmorphism */
