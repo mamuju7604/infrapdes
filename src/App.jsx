@@ -1,0 +1,184 @@
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { MapIcon, Filter, Layers, Navigation, MapPin } from 'lucide-react';
+import './index.css';
+
+// Fix for default Leaflet markers issue in React
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Category colors based on CSS root variables
+const KAT_COLORS = {
+  'PENDIDIKAN NEGERI': '#3b82f6', // blue
+  'PENDIDIKAN SWASTA': '#8b5cf6', // purple
+  'KESEHATAN': '#ef4444',        // red
+  'EKONOMI': '#10b981',         // green
+  'PERBANKAN': '#f59e0b'        // gold
+};
+
+const createCustomIcon = (color) => {
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `<div class="marker-inner" style="background-color: ${color};"></div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -10]
+  });
+};
+
+export default function App() {
+  const [villages, setVillages] = useState(null);
+  const [infraData, setInfraData] = useState([]);
+  const [activeFilters, setActiveFilters] = useState(Object.keys(KAT_COLORS));
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [geoRes, infraRes] = await Promise.all([
+          fetch('/data/villages.json').then(r => r.json()),
+          fetch('/data/infrastructure.json').then(r => r.json())
+        ]);
+        setVillages(geoRes);
+        setInfraData(infraRes);
+      } catch (err) {
+        console.error("Error loading data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const toggleFilter = (kategori) => {
+    setActiveFilters(prev => 
+      prev.includes(kategori) 
+        ? prev.filter(f => f !== kategori)
+        : [...prev, kategori]
+    );
+  };
+
+  const filteredData = infraData.filter(item => activeFilters.includes(item.kat));
+
+  if (loading) {
+    return (
+      <div style={{ width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: 'white' }}>
+        <h2>Loading Data Peta...</h2>
+      </div>
+    );
+  }
+
+  // Default Mamuju coordinates
+  const bounds = [
+    [-2.9, 118.6], // SW
+    [-2.6, 119.0]  // NE
+  ];
+
+  return (
+    <div className="app-container">
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h1 className="sidebar-title">
+            <MapIcon size={28} color="var(--accent-blue)" />
+            Peta Tata Ruang
+          </h1>
+          <p className="sidebar-subtitle">
+            Visualisasi Direktori Infrastruktur Kab. Mamuju (2026)
+          </p>
+        </div>
+
+        <div className="filter-section">
+          <div className="filter-group">
+            <h3><Filter size={14} style={{ display: 'inline', marginRight: '6px' }}/> Filter Kategori</h3>
+            {Object.entries(KAT_COLORS).map(([kat, color]) => {
+              const count = infraData.filter(d => d.kat === kat).length;
+              return (
+                <div 
+                  key={kat}
+                  className={`filter-option ${activeFilters.includes(kat) ? 'active' : ''}`}
+                  onClick={() => toggleFilter(kat)}
+                >
+                  <div className="filter-color" style={{ color: color, backgroundColor: color }} />
+                  <span className="filter-text">{kat}</span>
+                  <span className="filter-count">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="stats-widget">
+            <div className="stat-item">
+              <span className="stat-label">Total Titik Map</span>
+              <span className="stat-value">{filteredData.length}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Jumlah Desa</span>
+              <span className="stat-value">{villages?.features?.length || 0}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="map-container">
+        <MapContainer 
+          bounds={bounds} 
+          zoom={11} 
+          scrollWheelZoom={true}
+          zoomControl={false}
+          style={{ height: '100%', width: '100%' }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          />
+          
+          {villages && (
+            <GeoJSON 
+              data={villages}
+              style={{
+                color: 'rgba(255, 255, 255, 0.4)',
+                weight: 1,
+                fillColor: 'rgba(59, 130, 246, 0.05)',
+                fillOpacity: 0.1
+              }}
+              onEachFeature={(feature, layer) => {
+                 if (feature.properties) {
+                    layer.bindTooltip(feature.properties.nmdesa, {
+                       direction: 'center',
+                       className: 'custom-tooltip'
+                    });
+                 }
+              }}
+            />
+          )}
+
+          {filteredData.map(item => (
+            <Marker 
+              key={item.id} 
+              position={[item.lat, item.lng]}
+              icon={createCustomIcon(KAT_COLORS[item.kat] || '#fff')}
+            >
+              <Popup>
+                <div className="popup-kategori" style={{ color: KAT_COLORS[item.kat] || '#fff' }}>
+                  {item.kat}
+                </div>
+                <div className="popup-nama">{item.nama}</div>
+                <div className="popup-jenis">{item.jenis}</div>
+                <div className="popup-alamat">
+                  <MapPin size={14} color="var(--text-secondary)" />
+                  <span>{item.alamat || 'Alamat tidak tersedia'}</span>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </div>
+    </div>
+  );
+}
