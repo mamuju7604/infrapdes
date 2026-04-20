@@ -156,6 +156,10 @@ export default function App() {
           zoom={11} 
           scrollWheelZoom={true}
           zoomControl={false}
+          preferCanvas={true}
+          zoomAnimation={false}
+          fadeAnimation={false}
+          markerZoomAnimation={false}
           style={{ height: '100%', width: '100%' }}
         >
           <TileLayer
