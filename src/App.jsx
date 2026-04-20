@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from 'react-l
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { renderToString } from 'react-dom/server';
-import { MapIcon, Filter, Layers, Navigation, MapPin, GraduationCap, HeartPulse, ShoppingBag, Landmark } from 'lucide-react';
+import { MapIcon, Filter, Layers, Navigation, MapPin, GraduationCap, HeartPulse, ShoppingBag, Landmark, X } from 'lucide-react';
 import './index.css';
 
 // Fix for default Leaflet markers issue in React
@@ -49,6 +49,7 @@ export default function App() {
   const [infraData, setInfraData] = useState([]);
   const [activeFilters, setActiveFilters] = useState(Object.keys(KAT_COLORS));
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,13 +95,25 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <div className="sidebar">
+      <button 
+        className="mobile-toggle" 
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        <Filter size={24} />
+      </button>
+
+      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h1 className="sidebar-title">
-            <MapIcon size={28} color="var(--accent-blue)" />
-            Peta Tata Ruang
-          </h1>
-          <p className="sidebar-subtitle">
+          <div className="sidebar-title-wrapper" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h1 className="sidebar-title">
+              <MapIcon size={28} color="var(--accent-blue)" />
+              Peta Tata Ruang
+            </h1>
+            <button className="mobile-close" onClick={() => setIsSidebarOpen(false)}>
+              <X size={24} />
+            </button>
+          </div>
+          <p className="sidebar-subtitle" style={{ marginTop: '8px' }}>
             Visualisasi Direktori Infrastruktur Kab. Mamuju (2026)
           </p>
         </div>

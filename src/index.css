@@ -290,3 +290,73 @@ body {
 .leaflet-control-zoom a:hover {
   background: rgba(255, 255, 255, 0.1) !important;
 }
+
+/* === MOBILE RESPONSIVENESS === */
+.mobile-toggle {
+  display: none;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2000;
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  color: white;
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  transition: all 0.2s;
+}
+
+.mobile-toggle:hover {
+  background: rgba(255,255,255,0.1);
+  transform: scale(1.05);
+}
+
+.mobile-close {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.mobile-close:hover {
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .mobile-toggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .mobile-close {
+    display: block;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 85%;
+    max-width: 360px;
+    height: 100vh;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 20px 0 30px rgba(0,0,0,0.5);
+    z-index: 2001; /* Ensure above toggle button when open */
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+  
+  /* Fix zoom controls being hidden under toggle on mobile */
+  .leaflet-control-zoom {
+    margin-right: 16px !important;
+    margin-bottom: 24px !important;
+  }
+}
