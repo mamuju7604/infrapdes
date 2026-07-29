@@ -198,6 +198,67 @@ body {
 }
 .mobile-close:hover { color: white; }
 
+/* === TOGGLE OPTIONS === */
+.toggle-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px; cursor: pointer;
+  transition: all 0.15s ease; user-select: none;
+  margin-bottom: 6px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+}
+.toggle-option:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+}
+.toggle-option.active {
+  background: rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.3);
+  color: var(--text-primary);
+}
+
+.toggle-label-text { flex: 1; font-size: 13px; font-weight: 500; }
+
+.toggle-switch {
+  width: 36px; height: 20px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.25s ease;
+  flex-shrink: 0;
+}
+.toggle-switch.on {
+  background: var(--accent-blue);
+}
+.toggle-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.toggle-switch.on .toggle-thumb { left: 19px; }
+
+/* === LABEL TOOLTIP === */
+.label-tooltip {
+  background: rgba(15,23,42,0.9) !important;
+  border: 1px solid rgba(59,130,246,0.4) !important;
+  color: white !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+}
+.label-tooltip::before { display: none !important; }
+
 @media (max-width: 768px) {
   .mobile-toggle { display: flex; justify-content: center; align-items: center; }
   .mobile-close { display: block; }

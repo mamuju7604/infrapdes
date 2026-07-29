@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, GeoJSON, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, CircleMarker, Popup, Tooltip, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapIcon, Filter, MapPin, X } from 'lucide-react';
+import { MapIcon, Filter, MapPin, X, Tag, Satellite } from 'lucide-react';
 import './index.css';
 
 const KAT_COLORS = {
@@ -26,6 +26,8 @@ export default function App() {
   const [activeFilters, setActiveFilters] = useState(Object.keys(KAT_COLORS));
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showLabels, setShowLabels] = useState(false);
+  const [isSatellite, setIsSatellite] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -113,6 +115,33 @@ export default function App() {
             ))}
           </div>
 
+          {/* === MAP OPTIONS TOGGLES === */}
+          <div className="filter-group" style={{ marginTop: '16px' }}>
+            <h3>Opsi Peta</h3>
+
+            <div
+              className={`toggle-option ${showLabels ? 'active' : ''}`}
+              onClick={() => setShowLabels(v => !v)}
+            >
+              <Tag size={16} />
+              <span className="toggle-label-text">Label Nama</span>
+              <div className={`toggle-switch ${showLabels ? 'on' : ''}`}>
+                <div className="toggle-thumb" />
+              </div>
+            </div>
+
+            <div
+              className={`toggle-option ${isSatellite ? 'active' : ''}`}
+              onClick={() => setIsSatellite(v => !v)}
+            >
+              <Satellite size={16} />
+              <span className="toggle-label-text">Peta Satelit</span>
+              <div className={`toggle-switch ${isSatellite ? 'on' : ''}`}>
+                <div className="toggle-thumb" />
+              </div>
+            </div>
+          </div>
+
           <div className="stats-widget">
             <div className="stat-item">
               <span className="stat-label">Titik Ditampilkan</span>
@@ -131,13 +160,19 @@ export default function App() {
           bounds={bounds}
           scrollWheelZoom={true}
           zoomControl={false}
-          preferCanvas={true}
           style={{ height: '100%', width: '100%' }}
         >
-          <TileLayer
-            attribution='&copy; CARTO'
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          />
+          {isSatellite ? (
+            <TileLayer
+              attribution='&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            />
+          ) : (
+            <TileLayer
+              attribution='&copy; CARTO'
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            />
+          )}
 
           {villages && (
             <GeoJSON
@@ -170,6 +205,16 @@ export default function App() {
                 fillOpacity: 0.9
               }}
             >
+              {showLabels && (
+                <Tooltip
+                  permanent
+                  direction="top"
+                  offset={[0, -8]}
+                  className="label-tooltip"
+                >
+                  {item.n}
+                </Tooltip>
+              )}
               <Popup>
                 <div className="popup-kategori" style={{ color: KAT_COLORS[item.k] }}>
                   {KAT_LABELS[item.k]} {item.k}
